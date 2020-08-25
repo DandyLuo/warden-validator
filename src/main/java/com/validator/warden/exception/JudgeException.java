@@ -1,9 +1,9 @@
 package com.validator.warden.exception;
 
 /**
- * @author luoruihua
+ * @author DandyLuo
  */
-public class JudgeException extends WardenException {
+public class JudgeException extends WdException {
 
     public JudgeException(final String message) {
         super(message);
