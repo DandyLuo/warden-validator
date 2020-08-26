@@ -1,11 +1,10 @@
-package com.validator.warden.core.impl;
+package com.validator.warden.core;
 
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -16,45 +15,45 @@ import com.validator.warden.annotation.Check;
 import com.validator.warden.annotation.Matcher;
 import com.validator.warden.annotation.Matchers;
 import com.validator.warden.core.delegate.CheckDelegate;
-import com.validator.warden.core.Validator;
 import com.validator.warden.core.domain.CheckResult;
-import com.validator.warden.core.domain.CheckResultMsg;
 import com.validator.warden.core.domain.WdConstant;
 import com.validator.warden.core.domain.WdContext;
 import com.validator.warden.match.manager.MatchManager;
 import com.validator.warden.util.ClassUtil;
 import com.validator.warden.util.CollectionUtil;
 import com.validator.warden.util.ObjectUtil;
+import lombok.experimental.UtilityClass;
 
 /**
  * 校验实现类
  * @author DandyLuo
  * @since 1.0.0
  */
-public class WardenValidator implements Validator {
+@UtilityClass
+public class WardenValidator {
     /**
      * 对象属性值白名单：key为group名字，value为属性的匹配器
      */
-    private static Map<String, MatchManager> whiteGroupMap;
+    private Map<String, MatchManager> whiteGroupMap;
     /**
      * 对象属性值黑名单：key为group名字，value为属性的匹配器
      */
-    private static Map<String, MatchManager> blackGroupMap;
+    private Map<String, MatchManager> blackGroupMap;
     /**
      * 对象属性核查映射：key为规范化的类名，value为属性名
      */
-    private static Map<String, Set<String>> objectFieldCheckMap;
-    private static CheckDelegate delegate;
+    private Map<String, Set<String>> objectFieldCheckMap;
+    private CheckDelegate delegate;
     /**
      * 核查上下文
      */
-    private static WdContext context;
+    private WdContext context;
 
     static {
         init();
     }
 
-    private static void init() {
+    private void init() {
         whiteGroupMap = new ConcurrentHashMap<>(2);
         blackGroupMap = new ConcurrentHashMap<>(2);
         objectFieldCheckMap = new ConcurrentHashMap<>(16);
@@ -62,7 +61,6 @@ public class WardenValidator implements Validator {
         delegate = new CheckDelegate(context);
     }
 
-    @Override
     public CheckResult validate(final Object object){
         if (delegate.isEmpty(object)) {
             return CheckResult.ok();
@@ -73,12 +71,11 @@ public class WardenValidator implements Validator {
             return CheckResult.ok();
         } else {
             return new CheckResult()
-                    .setResult(this.check(WdConstant.DEFAULT_GROUP, object, ClassUtil.allFieldsOfClass(ClassUtil.peel(object)), this.getObjFieldMap(object), this.getWhiteMap(), this.getBlackMap()))
-                    .setMsg(CheckResultMsg.checkFail);
+                    .setSuccess(check(WdConstant.DEFAULT_GROUP, object, ClassUtil.allFieldsOfClass(ClassUtil.peel(object)), getObjFieldMap(object), getWhiteMap(), getBlackMap()))
+                    .setMsg(getErrMsgChain());
         }
     }
 
-    @Override
     public CheckResult validate(final String group, final Object object, final String... fieldSet) {
         final String groupDelegate = (null == group || "".equals(group)) ? WdConstant.DEFAULT_GROUP : group;
         if (delegate.isEmpty(object)) {
@@ -90,8 +87,8 @@ public class WardenValidator implements Validator {
             return CheckResult.ok();
         } else {
             return new CheckResult()
-                    .setResult(this.check(groupDelegate, object, this.getFieldToCheck(ClassUtil.peel(object), new HashSet<>(Arrays.asList(fieldSet))), this.getObjFieldMap(object), this.getWhiteMap(), this.getBlackMap()))
-                    .setMsg(CheckResultMsg.checkFail);
+                    .setSuccess(check(groupDelegate, object, getFieldToCheck(ClassUtil.peel(object), new HashSet<>(Arrays.asList(fieldSet))), getObjFieldMap(object), getWhiteMap(), getBlackMap()))
+                    .setMsg(getErrMsgChain());
         }
     }
 
@@ -127,7 +124,7 @@ public class WardenValidator implements Validator {
         }
 
         // 若当前对象没有对象属性索引树，则进行创建
-        this.createObjectFieldMap(object);
+        createObjectFieldMap(object);
 
         return objectFieldCheckMap;
     }
@@ -160,11 +157,11 @@ public class WardenValidator implements Validator {
                 final Matcher[] matcherList = f.getAnnotationsByType(Matcher.class);
                 for(final Matcher matcher: matcherList) {
                     if (null != matcher && !matcher.disable()) {
-                        this.addObjectFieldMap(clsCanonicalName, f.getName());
+                        addObjectFieldMap(clsCanonicalName, f.getName());
                         if (matcher.accept()) {
-                            this.addWhiteValueMap(whiteGroupMap, clsCanonicalName, f, matcher);
+                            addWhiteValueMap(whiteGroupMap, clsCanonicalName, f, matcher);
                         } else {
-                            this.addWhiteValueMap(blackGroupMap, clsCanonicalName, f, matcher);
+                            addWhiteValueMap(blackGroupMap, clsCanonicalName, f, matcher);
                         }
                     }
                 }
@@ -172,11 +169,11 @@ public class WardenValidator implements Validator {
                 final Matchers matchers = f.getAnnotation(Matchers.class);
                 if (null != matchers) {
                     Stream.of(matchers.value()).forEach(w -> {
-                        this.addObjectFieldMap(clsCanonicalName, f.getName());
+                        addObjectFieldMap(clsCanonicalName, f.getName());
                         if (w.accept()) {
-                            this.addWhiteValueMap(whiteGroupMap, clsCanonicalName, f, w);
+                            addWhiteValueMap(whiteGroupMap, clsCanonicalName, f, w);
                         } else {
-                            this.addWhiteValueMap(blackGroupMap, clsCanonicalName, f, w);
+                            addWhiteValueMap(blackGroupMap, clsCanonicalName, f, w);
                         }
                     });
                 }
@@ -186,12 +183,12 @@ public class WardenValidator implements Validator {
             fieldSet.stream().filter(f -> !ClassUtil.isCheckedType(f.getType())).forEach(f -> {
                 // 该属性对应的类型是否添加了注解 Check
                 if (f.isAnnotationPresent(Check.class)) {
-                    this.addObjectFieldMap(clsCanonicalName, f.getName());
+                    addObjectFieldMap(clsCanonicalName, f.getName());
                     Object fieldData = null;
                     try {
                         f.setAccessible(true);
                         fieldData = f.get(object);
-                        this.createObjectFieldMap(fieldData);
+                        createObjectFieldMap(fieldData);
                     } catch (final IllegalAccessException e) {
                         throw new RuntimeException(e);
                     }
@@ -241,5 +238,16 @@ public class WardenValidator implements Validator {
      */
     private Set<Field> getFieldToCheck(Class tClass, final Set<String> fieldStrSet) {
         return ClassUtil.allFieldsOfClass(tClass).stream().filter(f -> fieldStrSet.contains(f.getName())).collect(Collectors.toSet());
+    }
+
+    /**
+     * 返回错误信息链
+     * <p>
+     * 返回的结果是这种{@code xxxx没有匹配上 --> xxx的属性不符合需求 --> ...}
+     *
+     * @return 多个匹配错误的信息
+     */
+    public String getErrMsgChain() {
+        return delegate.getErrMsgChain();
     }
 }

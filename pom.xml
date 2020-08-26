@@ -15,14 +15,13 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <lombok.version>1.18.0</lombok.version>
-        <fastjson.version>1.2.46</fastjson.version>
+        <fastjson.version>1.2.70</fastjson.version>
         <spock.version>1.2-groovy-2.4</spock.version>
         <slf4j.version>1.7.25</slf4j.version>
         <groovy.version>2.4.8</groovy.version>
         <spring.version>5.1.5.RELEASE</spring.version>
         <logback.version>1.2.3</logback.version>
         <aspectj.version>1.9.5</aspectj.version>
-        <tomcat.version>9.0.36</tomcat.version>
     </properties>
 
     <dependencies>
@@ -88,12 +87,6 @@
             <groupId>org.aspectj</groupId>
             <artifactId>aspectjweaver</artifactId>
             <version>${aspectj.version}</version>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.tomcat.embed</groupId>
-            <artifactId>tomcat-embed-core</artifactId>
-            <version>${tomcat.version}</version>
             <optional>true</optional>
         </dependency>
     </dependencies>

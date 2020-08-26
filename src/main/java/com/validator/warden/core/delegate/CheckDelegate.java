@@ -323,7 +323,7 @@ public final class CheckDelegate {
         return true;
     }
 
-    String getErrMsgChain() {
+    public String getErrMsgChain() {
         return this.context.getErrMsgChain();
     }
 

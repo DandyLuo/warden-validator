@@ -9,14 +9,14 @@ import lombok.experimental.Accessors;
 @Data
 @Accessors(chain = true)
 public class CheckResult {
-    private boolean result;
-    private Enum<CheckResultMsg> msg;
+    private boolean success;
+    private String msg;
 
     public CheckResult() {
 
     }
 
     public static CheckResult ok() {
-        return new CheckResult().setResult(true).setMsg(CheckResultMsg.checkFail);
+        return new CheckResult().setSuccess(true).setMsg("ok");
     }
 }
