@@ -26,6 +26,7 @@ import lombok.experimental.UtilityClass;
 
 /**
  * 校验实现类
+ *
  * @author DandyLuo
  * @since 1.0.0
  */
@@ -61,7 +62,7 @@ public class WardenValidator {
         delegate = new CheckDelegate(context);
     }
 
-    public CheckResult validate(final Object object){
+    public CheckResult validate(final Object object) {
         if (delegate.isEmpty(object)) {
             return CheckResult.ok();
         }
@@ -101,6 +102,7 @@ public class WardenValidator {
      * @param objectFieldMap 对象的属性映射表，key为类的canonicalName，value为当前类的属性的集合
      * @param whiteSet       属性的白名单映射表，key为类的canonicalName，value为map，其中key为属性的名字，value为属性的可用值
      * @param blackSet       属性的黑名单映射表，key为类的canonicalName，value为map，其中key为属性的名字，value为属性的禁用值
+     *
      * @return 核查结果 true：核查成功；false：核查失败
      */
     private boolean check(final String group, final Object object, final Set<Field> fieldSet, final Map<String, Set<String>> objectFieldMap, final Map<String, MatchManager> whiteSet, final Map<String, MatchManager> blackSet) {
@@ -151,50 +153,51 @@ public class WardenValidator {
         }
 
         final Set<Field> fieldSet = ClassUtil.allFieldsOfClass(cls);
-        if (!CollectionUtil.isEmpty(fieldSet)) {
-            // 待核查类型用于获取注解的属性
-            fieldSet.forEach(f -> {
-                final Matcher[] matcherList = f.getAnnotationsByType(Matcher.class);
-                for(final Matcher matcher: matcherList) {
-                    if (null != matcher && !matcher.disable()) {
-                        addObjectFieldMap(clsCanonicalName, f.getName());
-                        if (matcher.accept()) {
-                            addWhiteValueMap(whiteGroupMap, clsCanonicalName, f, matcher);
-                        } else {
-                            addWhiteValueMap(blackGroupMap, clsCanonicalName, f, matcher);
-                        }
-                    }
-                }
-
-                final Matchers matchers = f.getAnnotation(Matchers.class);
-                if (null != matchers) {
-                    Stream.of(matchers.value()).forEach(w -> {
-                        addObjectFieldMap(clsCanonicalName, f.getName());
-                        if (w.accept()) {
-                            addWhiteValueMap(whiteGroupMap, clsCanonicalName, f, w);
-                        } else {
-                            addWhiteValueMap(blackGroupMap, clsCanonicalName, f, w);
-                        }
-                    });
-                }
-            });
-
-            // 非待核查类型拆分开进行迭代分析
-            fieldSet.stream().filter(f -> !ClassUtil.isCheckedType(f.getType())).forEach(f -> {
-                // 该属性对应的类型是否添加了注解 Check
-                if (f.isAnnotationPresent(Check.class)) {
-                    addObjectFieldMap(clsCanonicalName, f.getName());
-                    Object fieldData = null;
-                    try {
-                        f.setAccessible(true);
-                        fieldData = f.get(object);
-                        createObjectFieldMap(fieldData);
-                    } catch (final IllegalAccessException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-            });
+        if (CollectionUtil.isEmpty(fieldSet)) {
+            return;
         }
+        // 待核查类型用于获取注解的属性
+        fieldSet.forEach(f -> {
+            final Matcher[] matcherList = f.getAnnotationsByType(Matcher.class);
+            for (final Matcher matcher : matcherList) {
+                if (null != matcher && !matcher.disable()) {
+                    addObjectFieldMap(clsCanonicalName, f.getName());
+                    if (matcher.accept()) {
+                        addMatcherValueToMap(whiteGroupMap, clsCanonicalName, f, matcher);
+                    } else {
+                        addMatcherValueToMap(blackGroupMap, clsCanonicalName, f, matcher);
+                    }
+                }
+            }
+
+            final Matchers matchers = f.getAnnotation(Matchers.class);
+            if (null != matchers) {
+                Stream.of(matchers.value()).forEach(w -> {
+                    addObjectFieldMap(clsCanonicalName, f.getName());
+                    if (w.accept()) {
+                        addMatcherValueToMap(whiteGroupMap, clsCanonicalName, f, w);
+                    } else {
+                        addMatcherValueToMap(blackGroupMap, clsCanonicalName, f, w);
+                    }
+                });
+            }
+        });
+
+        // 非待核查类型拆分开进行迭代分析
+        fieldSet.stream().filter(f -> !ClassUtil.isCheckedType(f.getType())).forEach(f -> {
+            // 该属性对应的类型是否添加了注解 Check
+            if (f.isAnnotationPresent(Check.class)) {
+                addObjectFieldMap(clsCanonicalName, f.getName());
+                Object fieldData = null;
+                try {
+                    f.setAccessible(true);
+                    fieldData = f.get(object);
+                    createObjectFieldMap(fieldData);
+                } catch (final IllegalAccessException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
     }
 
     private void addObjectFieldMap(final String objectClsName, final String fieldName) {
@@ -210,7 +213,7 @@ public class WardenValidator {
         });
     }
 
-    private void addWhiteValueMap(final Map<String, MatchManager> groupMather, final String clsCanonicalName, final Field field, final Matcher matcher) {
+    private void addMatcherValueToMap(final Map<String, MatchManager> groupMather, final String clsCanonicalName, final Field field, final Matcher matcher) {
         Arrays.asList(matcher.group()).forEach(g -> groupMather.compute(g, (k, v) -> {
             if (null == v) {
                 return new MatchManager().addWhite(clsCanonicalName, field, matcher, context);
@@ -234,6 +237,7 @@ public class WardenValidator {
      *
      * @param tClass      目标类型
      * @param fieldStrSet 调用方想要调用的属性的字符串名字集合
+     *
      * @return 属性的Field类型集合
      */
     private Set<Field> getFieldToCheck(Class tClass, final Set<String> fieldStrSet) {

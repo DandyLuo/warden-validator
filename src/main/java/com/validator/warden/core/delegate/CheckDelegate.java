@@ -150,7 +150,7 @@ public final class CheckDelegate {
                 try {
                     field.setAccessible(true);
                     result = this.available(field.get(object), objectFieldMap, whiteGroupMather, blackGroupMather);
-                } catch (IllegalAccessException e) {
+                } catch (final IllegalAccessException e) {
                     throw new RuntimeException(e);
                 }
             }

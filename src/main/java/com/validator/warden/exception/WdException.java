@@ -1,22 +1,22 @@
 package com.validator.warden.exception;
 
 /**
- * @author zhouzhenyong
- * @since 2019-08-12 22:09
+ * @author DandyLuo
  */
 public class WdException extends RuntimeException {
 
     private static final String PRE = "核查异常：";
+    private static final long serialVersionUID = -6288726404418467941L;
 
-    public WdException(String message) {
+    public WdException(final String message) {
         super(PRE + message);
     }
 
-    public WdException(String message, Throwable e) {
+    public WdException(final String message, final Throwable e) {
         super(PRE + message, e);
     }
 
-    public WdException(Throwable e) {
+    public WdException(final Throwable e) {
         super(e);
     }
 }
