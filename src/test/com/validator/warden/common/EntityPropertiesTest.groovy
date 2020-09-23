@@ -1,16 +1,20 @@
 package com.validator.warden.common
 
+import com.validator.warden.WardenValidator
 import com.validator.warden.core.domain.CheckResult
 import com.validator.warden.core.domain.WdConstant
 import org.junit.Assert
 import spock.lang.Specification
-import com.validator.warden.core.WardenValidator;
 
 /**
  * @author DandyLuo
  */
 class EntityPropertiesTest extends Specification {
 
+    /**
+     * 测试指定的属性name
+     * @return
+     */
     def nameAsSpecifiedPropertyTest() {
         given:
         TestEntity entity = new TestEntity().setName(name).setAge(age)
@@ -33,6 +37,10 @@ class EntityPropertiesTest extends Specification {
         null      | 30  | true
     }
 
+    /**
+     * 测试指定的属性age
+     * @return
+     */
     def ageAsSpecifiedPropertyTest() {
         given:
         TestEntity entity = new TestEntity().setName(name).setAge(age)
@@ -54,6 +62,10 @@ class EntityPropertiesTest extends Specification {
         null     | null | false
     }
 
+    /**
+     * 测试指定的属性address
+     * @return
+     */
     def addressAsSpecifiedPropertyTest() {
         given:
         TestEntity entity = new TestEntity().setName(name).setAge(age).setAddress(address)
