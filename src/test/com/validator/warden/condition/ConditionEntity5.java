@@ -1,10 +1,10 @@
 package com.validator.warden.condition;
 
+import java.util.List;
+
 import com.validator.warden.annotation.Matcher;
 import lombok.Data;
 import lombok.experimental.Accessors;
-
-import java.util.List;
 
 /**
  * @author DandyLuo

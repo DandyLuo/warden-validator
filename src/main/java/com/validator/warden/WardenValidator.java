@@ -1,4 +1,4 @@
-package com.validator.warden.core;
+package com.validator.warden;
 
 
 import java.lang.reflect.Field;
@@ -26,7 +26,7 @@ import lombok.experimental.UtilityClass;
 
 /**
  * 校验实现类
- *
+ * 静态工具类
  * @author DandyLuo
  * @since 1.0.0
  */
@@ -62,6 +62,12 @@ public class WardenValidator {
         delegate = new CheckDelegate(context);
     }
 
+    /**
+     * 自定义的复杂类型校验，待核查类型校验不校验，直接返回true
+     *
+     * @param object 待核查对象
+     * @return CheckResult 详{@link CheckResult}
+     */
     public CheckResult validate(final Object object) {
         if (delegate.isEmpty(object)) {
             return CheckResult.ok();
@@ -77,6 +83,14 @@ public class WardenValidator {
         }
     }
 
+    /**
+     * 针对对象的某些属性进行核查
+     *
+     * @param group    分组，为空则采用默认，为"_default_"，详{@link WdConstant#DEFAULT_GROUP}
+     * @param object   待核查对象
+     * @param fieldSet 待核查对象的多个属性名字
+     * @return CheckResult 详{@link CheckResult}
+     */
     public CheckResult validate(final String group, final Object object, final String... fieldSet) {
         final String groupDelegate = (null == group || "".equals(group)) ? WdConstant.DEFAULT_GROUP : group;
         if (delegate.isEmpty(object)) {
@@ -89,6 +103,29 @@ public class WardenValidator {
         } else {
             return new CheckResult()
                     .setSuccess(check(groupDelegate, object, getFieldToCheck(ClassUtil.peel(object), new HashSet<>(Arrays.asList(fieldSet))), getObjFieldMap(object), getWhiteMap(), getBlackMap()))
+                    .setMsg(getErrMsgChain());
+        }
+    }
+
+    /**
+     * 自定义的复杂类型校验，待核查类型校验不校验，核查失败抛异常
+     *
+     * @param group  分组，为空则采用默认，为"_default_"，详{@link WdConstant#DEFAULT_GROUP}
+     * @param object 待核查对象
+     * @return  CheckResult 详{@link CheckResult}
+     */
+    public CheckResult validate(final String group, final Object object) {
+        final String groupDelegate = (null == group || "".equals(group)) ? WdConstant.DEFAULT_GROUP : group;
+        if (delegate.isEmpty(object)) {
+            return CheckResult.ok();
+        }
+
+        // 待核查类型不核查，直接返回核查成功
+        if (ClassUtil.isCheckedType(object.getClass())) {
+            return CheckResult.ok();
+        } else {
+            return new CheckResult()
+                    .setSuccess(check(groupDelegate, object, ClassUtil.allFieldsOfClass(ClassUtil.peel(object)), getObjFieldMap(object), getWhiteMap(), getBlackMap()))
                     .setMsg(getErrMsgChain());
         }
     }
@@ -240,7 +277,7 @@ public class WardenValidator {
      *
      * @return 属性的Field类型集合
      */
-    private Set<Field> getFieldToCheck(Class tClass, final Set<String> fieldStrSet) {
+    private Set<Field> getFieldToCheck(final Class tClass, final Set<String> fieldStrSet) {
         return ClassUtil.allFieldsOfClass(tClass).stream().filter(f -> fieldStrSet.contains(f.getName())).collect(Collectors.toSet());
     }
 
