@@ -4,8 +4,8 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.dandy.util</groupId>
-    <artifactId>warden</artifactId>
+    <groupId>com.github.DandyLuo</groupId>
+    <artifactId>warden-validator</artifactId>
     <packaging>jar</packaging>
     <version>1.0.0</version>
 
@@ -57,7 +57,6 @@
             <artifactId>fastjson</artifactId>
             <version>${fastjson.version}</version>
         </dependency>
-
         <!--spock测试框架-->
         <dependency>
             <groupId>org.spockframework</groupId>
@@ -115,22 +114,22 @@
     <build>
         <plugins>
             <!-- Source -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
-                <version>2.1</version>
-                <configuration>
-                    <attach>true</attach>
-                </configuration>
-                <executions>
-                    <execution>
-                        <phase>compile</phase>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
+<!--            <plugin>-->
+<!--                <groupId>org.apache.maven.plugins</groupId>-->
+<!--                <artifactId>maven-source-plugin</artifactId>-->
+<!--                <version>2.1</version>-->
+<!--                <configuration>-->
+<!--                    <attach>true</attach>-->
+<!--                </configuration>-->
+<!--                <executions>-->
+<!--                    <execution>-->
+<!--                        <phase>compile</phase>-->
+<!--                        <goals>-->
+<!--                            <goal>jar</goal>-->
+<!--                        </goals>-->
+<!--                    </execution>-->
+<!--                </executions>-->
+<!--            </plugin>-->
 
             <!--maven支持spock测试框架-->
             <plugin>
@@ -146,11 +145,13 @@
         </plugins>
     </build>
 
+
+
     <distributionManagement>
         <repository>
             <id>github</id>
-            <name>warden-validator</name>
-            <url>https://github.com/DandyLuo/warden-validator</url>
+            <name>DandyLuo</name>
+            <url>https://maven.pkg.github.com/DandyLuo</url>
         </repository>
     </distributionManagement>
 </project>
