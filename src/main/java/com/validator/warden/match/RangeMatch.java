@@ -19,7 +19,7 @@ import org.codehaus.groovy.syntax.Numbers;
 import org.springframework.util.StringUtils;
 
 /**
- * 正则表达式判断，对应{@link Matcher#range()}
+ * 正则表达式判断
  *
  * @author DandyLuo
  */
