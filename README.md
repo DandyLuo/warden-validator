@@ -1,5 +1,7 @@
 ![](https://github.com/DandyLuo/mardownImage/blob/master/Warden_artwork%20(2).jpg)
 # Warden-Validator
+## 引用的第三方依赖
+- spock-core,fastjson,lombok,slf4j-api,logback-core,logback-classic,groovy-all,spring-context,spring-web,aspectjweaver
 ## 项目背景
 - 作为一个接口工具人，crud-boy，日常工作的重中之重当然是写接口了，而写接口必不可少的环节就是对接口请求参数进行校验，无论是日常判空，还是为了拦截非法参数从而保护我们的应用程序，参数校验都已经成为了一项越来越“繁重”且“机械”的工作，思考如何优雅而高效地完成这项工作显然能够提升每一个接口工具人的工作效率，从而摆脱加班996、走向人生巅峰、赢取白富美。
 - Warden-Validator正是为解决参数校验而生的轻量级工具类框架，无论是NULL、空字符串、枚举的校验，抑或是通过正则表达式校验、脚本校验、多个属性组合校验，甚至是一条段java代码的校验，我们都支持。
