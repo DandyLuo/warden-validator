@@ -199,7 +199,7 @@ public class AppIdReq {
 
     @Matchers({
         @Matcher(notNull = "true"),
-        @Matcher(group = {MkConstant.DEFAULT_GROUP, "startBuild", "finishTest", "startDeploy", "stop", "quite"}, customize = "com.xxx.yyy.ExistMatch#appIdExist", errMsg = "应用id: #current 不存在"),
+        @Matcher(group = {WdConstant.DEFAULT_GROUP, "startBuild", "finishTest", "startDeploy", "stop", "quite"}, customize = "com.xxx.yyy.ExistMatch#appIdExist", errMsg = "应用id: #current 不存在"),
         // 启动构建 动作的状态核查
         @Matcher(group = "startBuild", customize = "com.xxx.yyy.DeployStatusMatch#startBuild", errMsg = "应用id: #current 不在阶段'未编译'，请先退出"),
         // 测试完成 动作的状态核查
